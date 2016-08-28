@@ -1,0 +1,126 @@
+## Author: Jeffrey Guan
+## Name: compute_node.template.yaml
+## Date: 2016-08-15
+## Note: create network resources.
+## Version: Kilo
+
+heat_template_version: '2015-04-30'
+
+description: Compute server
+
+parameters:
+  name:
+    type: string
+    default: "cpu_volume"
+  image:
+    type: string
+    default: "cirrors"
+  flavor:
+    type: string
+    default: m1.small
+  volumeSize:
+    type: string
+    description: size of the cinder volume used for database
+    default: 10
+  br-fw-admin-network_id:
+    type: string
+    default: "dddddd"
+    description: 
+  br-storage-network_id:
+    type: string
+    default: "dddddd"
+    description: 
+  br-mgmt-network_id:
+    type: string
+    default: "dddddd"
+    description: 
+  br-mesh-network_id:
+    type: string
+    default: "dddddd"
+    description: 
+  user_data:
+    type: string
+    default: "dddddd"
+    description: 
+    
+resources:
+
+## start of compute node definitions
+
+  ################################################################
+  #                 Begin: Create Port                           #
+  ################################################################
+  ETH0-br-fw-admin:
+    type: OS::Neutron::Port
+    properties:
+      name: { get_param: name }
+      network: { get_param: br-fw-admin-network_id }
+
+  # Creat a new port.
+  ETH1-br-storage:
+    type: OS::Neutron::Port
+    properties:
+      name: "eth0"
+      network: { get_param: br-storage-network_id }
+
+  # Creat a new port.
+  ETH2-br-mgmt:
+    type: OS::Neutron::Port
+    properties:
+      name: "eth1"
+      network: { get_param: br-mgmt-network_id }
+
+  # Creat a new port.
+  ETH3-br-mesh:
+    type: OS::Neutron::Port
+    properties:
+      name: "eth2"
+      network: { get_param: br-mesh-network_id }
+ 
+  ################################################################
+  #              End: Create Port                                #
+  ################################################################
+  
+  # Create compute node.
+  cpu_node:
+    type: OS::Nova::Server
+#    depends_on: cpuVolume
+    properties:
+      name:
+        str_replace:
+          template: $hostname
+          params:
+            $hostname: { get_param: name }
+
+      flavor: { get_param: flavor }
+      config_drive: True
+      image: { get_param: image }
+      user_data: { get_param: user_data }
+#      block_device_mapping:
+#        - { volume_id: { get_resource: cpuVolume }, device_name: vdb, delete_on_termination: 'true' } 
+
+      networks:
+        - port: { get_resource: ETH0-br-fw-admin }
+        - port: { get_resource: ETH1-br-storage }
+        - port: { get_resource: ETH2-br-mgmt }
+        - port: { get_resource: ETH3-br-mesh }
+        
+  # Create volume for compute node.
+#  cpuVolume:
+#    type: OS::Cinder::Volume
+#    properties:
+#      name:
+#        str_replace:
+#          template: $name:vdb
+#          params:
+#            $name: { get_param: name }
+#      size: { get_param: volumeSize }
+  #cpuVolumeAttach:
+  #  type: OS::Cinder::VolumeAttachment
+  #  properties:
+  #    instance_uuid: { get_resource: cpu_node }
+  #    volume_id: { get_resource: cpuVolume }
+  #    mountpoint: /dev/vdc
+## end of node compute node definitions
+
+
