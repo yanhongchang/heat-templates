@@ -1,0 +1,275 @@
+## Author: Jeffrey Guan
+## Name: networking.template.yaml
+## Date: 2016-08-15
+## Note: create network resources.
+## Version: Kilo
+
+heat_template_version: 2015-04-30
+
+description: 
+
+parameters:
+  sec_name_prefix:
+    type: string
+    description: security group name
+    default: "sec_name"
+  net04_ext_prefix_name:
+    type: string
+    description: prefix name for net04_ext
+    default: jeguan
+  net04_ext_subnet_cfg:
+    type: json 
+    default:
+      {
+        "cidr": "192.168.150.0/24",
+        "gateway_ip": "192.168.150.1" 
+      }
+  br_fw_admin_prefix_name:
+    type: string
+    description: prefix name for br-fw-admin 
+    default: jeguan
+  br_fw_admin_subnet_cfg:
+    type: json 
+    default:
+      {
+        "cidr": "192.168.160.0/24",
+        "gateway_ip": "192.168.160.1" 
+      }
+  br_storage_prefix_name:
+    type: string
+    description: prefix name for br-storage-admin 
+    default: jeguan
+  br_storage_subnet_cfg:
+    type: json 
+    default:
+      {
+        "cidr": "192.168.170.0/24",
+        "gateway_ip": "192.168.170.1" 
+      }
+  br_mgmt_prefix_name:
+    type: string
+    description: prefix name for br-mgmt
+    default: jeguan
+  br_mgmt_subnet_cfg:
+    type: json 
+    default:
+      {
+        "cidr": "192.168.180.0/24",
+        "gateway_ip": "192.168.180.1" 
+      }
+  br_mesh_prefix_name:
+    type: string
+    description: prefix name for br-esh
+    default: jeguan
+  br_mesh_subnet_cfg:
+    type: json 
+    default:
+      {
+        "cidr": "192.168.190.0/24",
+        "gateway_ip": "192.168.190.1" 
+      }
+  floating_network_id:
+    type: string
+    default: "07cb6722-6986-4aba-8f4f-1a0556e51362"
+
+resources:
+
+  ################################################################
+  #	            Begin: Create Network	                 #
+  ################################################################
+
+  # Create internal network: br-fw-admin. 
+  # br-storage<-->vnet0<--->eth0
+  BR-FW-ADMIN:
+    type: OS::Neutron::Net
+    properties:
+      shared: False
+      name: 
+        str_replace:
+          template: $prefix_name-br_fw_admin
+          params:
+            $prefix_name: { get_param: br_fw_admin_prefix_name}  
+  BR-FW-ADMIN_SUBNET:
+    type: OS::Neutron::Subnet
+    properties:
+      name:
+        str_replace:
+          template: $prefix_name-br_fw_admin_subnet
+          params:
+            $prefix_name: { get_param: br_fw_admin_prefix_name}
+      network: { get_resource: BR-FW-ADMIN}
+      ip_version: 4
+      enable_dhcp: true
+      cidr: { get_param: [br_fw_admin_subnet_cfg, cidr] }
+      gateway_ip: { get_param: [br_fw_admin_subnet_cfg, gateway_ip] }
+
+  # Create internal network: br-storage.
+  # br-storage<--->vnet1<--->eth1
+  BR-STORAGE:
+    type: OS::Neutron::Net
+    properties:
+      shared: False
+      name: 
+        str_replace:
+          template: $prefix_name-br_storage
+          params:
+            $prefix_name: { get_param: br_storage_prefix_name}  
+  BR-STORAGE_SUBNET:
+    type: OS::Neutron::Subnet
+    properties:
+      name:
+        str_replace:
+          template: $prefix_name-br_storage_subnet
+          params:
+            $prefix_name: { get_param: br_storage_prefix_name}
+      network: { get_resource: BR-STORAGE}
+      ip_version: 4
+      enable_dhcp: true
+      cidr: { get_param: [br_storage_subnet_cfg, cidr] }
+      gateway_ip: { get_param: [br_storage_subnet_cfg, gateway_ip] }
+
+  # Create internal network: net04_ext.
+  # This is created to connect the External Network.
+  # net04_ext<--->vnet2<--->eth2
+  NET04-EXT:
+    type: OS::Neutron::Net
+    properties:
+      shared: False
+      name: 
+        str_replace:
+          template: $prefix_name-net04_ext
+          params:
+            $prefix_name: { get_param: net04_ext_prefix_name}  
+  NET04-EXT_SUBNET:
+    type: OS::Neutron::Subnet
+    properties:
+      name:
+        str_replace:
+          template: $prefix_name-net04_ext_subnet
+          params:
+            $prefix_name: { get_param: net04_ext_prefix_name}
+      network: { get_resource: NET04-EXT}
+      ip_version: 4
+      enable_dhcp: true
+      cidr: { get_param: [net04_ext_subnet_cfg, cidr] }
+      gateway_ip: { get_param: [net04_ext_subnet_cfg, gateway_ip] }
+
+  # Create internal network: br-mgmt.
+  # br-mgmt<--->vnet3<--->eth3
+  BR-MGMT:
+    type: OS::Neutron::Net
+    properties:
+      shared: False
+      name: 
+        str_replace:
+          template: $prefix_name-br_mgmt
+          params:
+            $prefix_name: { get_param: br_mgmt_prefix_name}  
+  BR-MGMT_SUBNET:
+    type: OS::Neutron::Subnet
+    properties:
+      name:
+        str_replace:
+          template: $prefix_name-br_mgmt_subnet
+          params:
+            $prefix_name: { get_param: br_mgmt_prefix_name}
+      network: { get_resource: BR-MGMT}
+      ip_version: 4
+      enable_dhcp: true
+      cidr: { get_param: [br_mgmt_subnet_cfg, cidr] }
+      gateway_ip: { get_param: [br_mgmt_subnet_cfg, gateway_ip] }
+
+  # Create internal network: br-mesh.
+  # br-mesh<--->vnet4<--->eth4
+  BR-MESH:
+    type: OS::Neutron::Net
+    properties:
+      shared: False
+      name: 
+        str_replace:
+          template: $prefix_name-br_mesh
+          params:
+            $prefix_name: { get_param: br_mesh_prefix_name}  
+  BR-MESH_SUBNET:
+    type: OS::Neutron::Subnet
+    properties:
+      name:
+        str_replace:
+          template: $prefix_name-br_mesh_subnet
+          params:
+            $prefix_name: { get_param: br_mesh_prefix_name}
+      network: { get_resource: BR-MESH}
+      ip_version: 4
+      enable_dhcp: true
+      cidr: { get_param: [br_mesh_subnet_cfg, cidr] }
+      gateway_ip: { get_param: [br_mesh_subnet_cfg, gateway_ip] }
+  ################################################################
+  #	            End: Create Network 	                 #
+  ################################################################
+
+  # Create a router. Add two interfaces for this Router:
+  # floating_ip and internal subnet.
+  vRouter:
+    type: OS::Neutron::Router
+    properties:
+      name: 
+        str_replace:
+          template: $prefix_name_vRouter
+          params:
+            $prefix_name: { get_param: sec_name_prefix }
+      # External network gateway configuration for a router
+      external_gateway_info: 
+        {"network": { get_param: floating_network_id } }
+  vRouterInterfaceAttach:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: {get_resource: vRouter}
+      subnet: { get_resource: NET04-EXT_SUBNET }
+  
+  # Create security group
+  SEC_GROUP:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: 
+        str_replace:
+          template: $prefix_name_Security_Group
+          params:
+            $prefix_name: { get_param: sec_name_prefix }
+      rules:
+        - { direction: ingress, ethertype: IPv4, protocol: icmp, remote_ip_prefix: '0.0.0.0/0' } 
+        - { direction: egress, ethertype: IPv4, protocol: icmp, remote_ip_prefix: '0.0.0.0/0' } 
+        - { direction: ingress, ethertype: IPv4, protocol: udp, remote_ip_prefix: '0.0.0.0/0' } 
+        - { direction: egress, ethertype: IPv4, protocol: udp, remote_ip_prefix: '0.0.0.0/0' }
+        - { direction: ingress, ethertype: IPv4, protocol: tcp, remote_ip_prefix: '0.0.0.0/0' }
+        - { direction: egress, ethertype: IPv4, protocol: tcp, remote_ip_prefix: '0.0.0.0/0' }
+        
+outputs:
+  "Private_Network":
+    description: "output for other use"
+    value: {
+      "br-fw-admin": {
+        "network": { get_resource: BR-FW-ADMIN },
+        "subnet": { get_resource: BR-FW-ADMIN_SUBNET }
+        },
+      "br-storage": {
+        "network": { get_resource: BR-STORAGE },
+        "subnet": { get_resource: BR-STORAGE_SUBNET }
+        },
+      "net04_ext": {
+        "network": { get_resource: NET04-EXT},
+        "subnet": { get_resource: NET04-EXT_SUBNET }
+        },
+      "br-mgmt": {
+        "network": { get_resource: BR-MGMT },
+        "subnet": { get_resource: BR-MGMT_SUBNET }
+        },
+      "br-mesh": {
+        "network": { get_resource: BR-MESH },
+        "subnet": { get_resource: BR-MESH_SUBNET }
+        }
+      }
+  "Security_Group":
+    description: "security group"
+    value: {
+      "sec_group": { get_resource: SEC_GROUP }
+      }
