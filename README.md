@@ -17,3 +17,11 @@ useage:
 heat stack-update -f lenovo.hot.yaml -e lenovo.env.yaml stack-name
 
 
+NOTES:
+
+1. we can add the configuration commands in userdata_compute_node.sh
+   and userdata_controller_node.sh to setup your controller node and 
+   compute node accordingly.
+
+
+
