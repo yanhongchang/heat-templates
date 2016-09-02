@@ -32,6 +32,4 @@ cat >>${NIC_DIR}/ifcfg-br-mesh <<EOF
 up route add -host 169.254.169.254 dev br-mesh
 EOF
 
-sudo reboot
-
 exit 0
