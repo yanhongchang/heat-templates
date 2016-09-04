@@ -19,7 +19,7 @@ NIC_DIR="/etc/network/interfaces.d/"
 ##################################################
 
 # br-fw-admin: setup br-fw-admin
-touch ${NIC_DIR}/ifcfg-fw-admin
+touch ${NIC_DIR}/ifcfg-br-fw-admin
 cat >>${NIC_DIR}/ifcfg-br-fw-admin <<EOF
 auto br-fw-admin
 iface br-fw-admin inet dhcp
@@ -27,7 +27,7 @@ bridge-ports eth0
 EOF
 
 # br-storage: set br-storage's mac address and setup the route.
-touch ${NIC_DIR}/ifcfg-storage
+touch ${NIC_DIR}/ifcfg-br-storage
 cat >> ${NIC_DIR}/ifcfg-br-storage <<EOF
 auto br-storage
 iface br-storage inet dhcp

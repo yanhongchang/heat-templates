@@ -4,7 +4,7 @@
 ## Name: 	userdata_controller_node.sh
 ## Date: 	2016-09-01
 ## Note: 	userdata file for controller node.
-## Version: 	v2.0
+## Version: 	v1.0
 
 # get the NICs MAC address.
 ETH0_MAC_ADDRESS=`cat /sys/class/net/eth0/address`
@@ -20,7 +20,7 @@ NIC_DIR="/etc/network/interfaces.d/"
 ##################################################
 
 # br-fw-admin: setup br-fw-admin
-touch ${NIC_DIR}/ifcfg-fw-admin
+touch ${NIC_DIR}/ifcfg-br-fw-admin
 cat >>${NIC_DIR}/ifcfg-br-fw-admin <<EOF
 auto br-fw-admin
 iface br-fw-admin inet dhcp
@@ -28,7 +28,7 @@ bridge-ports eth0
 EOF
 
 # br-storage: set br-storage's mac address and setup the route.
-touch ${NIC_DIR}/ifcfg-storage
+touch ${NIC_DIR}/ifcfg-br-storage
 cat >> ${NIC_DIR}/ifcfg-br-storage <<EOF
 auto br-storage
 iface br-storage inet dhcp
