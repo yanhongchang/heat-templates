@@ -4,7 +4,7 @@
 ## Name: 	userdata_controller_node.sh
 ## Date: 	2016-09-01
 ## Note: 	userdata file for controller node.
-## Version: 	v1.0
+## Version: 	v2.0
 
 # get the NICs MAC address.
 ETH0_MAC_ADDRESS=`cat /sys/class/net/eth0/address`
