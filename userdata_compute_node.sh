@@ -6,12 +6,6 @@
 ## Note: 	userdata file for compute node.
 ## Version: 	v1.0
 
-# get the NICs MAC address.
-ETH0_MAC_ADDRESS=`cat /sys/class/net/eth0/address`
-ETH1_MAC_ADDRESS=`cat /sys/class/net/eth1/address`
-ETH2_MAC_ADDRESS=`cat /sys/class/net/eth2/address`
-ETH3_MAC_ADDRESS=`cat /sys/class/net/eth3/address`
-
 NIC_DIR="/etc/network/interfaces.d/"
 
 ##################################################
@@ -44,13 +38,6 @@ EOF
 sed -i "/^up route add/d" /etc/rc.local
 sed -i "/^ifconfig br-mgmt/d" /etc/rc.local
 sed -i "/^$/d" /etc/rc.local
-cat >>/etc/rc.local <<EOF
-ifconfig br-mgmt down
-ifconfig br-mgmt hw ether ${ETH3_MAC_ADDRESS}
-ifconfig br-mgmt up
-
-route add default gw 192.168.100.1
-EOF
 
 # br-mesh: set route for 169.254.169.254
 touch ${NIC_DIR}/ifcfg-br-mesh
