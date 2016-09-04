@@ -76,6 +76,28 @@ sed -i "/^$/d" ${NIC_DIR}/ifcfg-br-mesh
 cat >>${NIC_DIR}/ifcfg-br-mesh <<EOF
 up route add -host 169.254.169.254 dev br-mesh
 EOF
+
+# p_ff798dba-0:
+touch ${NIC_DIR}/ifcfg-p_ff798dba-0
+cat > ${NIC_DIR}/ifcfg-p_ff798dba-0 <<EOF
+auto p_ff798dba-0
+allow-br-floating p_ff798dba-0
+iface p_ff798dba-0 inet manual
+mtu 6500
+ovs_type OVSIntPort
+ovs_bridge br-floating
+EOF
+
+# br-floating
+touch ${NIC_DIR}/ifcfg-br-floating
+cat > ${NIC_DIR}/ifcfg-br-floating <<EOF
+auto br-floating
+allow-ovs br-floating
+iface br-floating inet manual
+ovs_ports p_ff798dba-0
+ovs_type OVSBridge
+EOF
+
 ##################################################
 #		End add bridges		         #
 ##################################################
