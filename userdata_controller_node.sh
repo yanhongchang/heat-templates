@@ -155,7 +155,7 @@ cat > /home/setup_mac_addr_4_b_public.sh <<EOF
 # check if the b_public is up before setup the mac address for it.
 
 is_b_pub_ready=1
-until [ is_b_pub_ready -ne 1 ]
+until [ ${is_b_pub_ready} -ne 1 ]
 do
   ip netns exec haproxy ifconfig | grep b_public
   is_b_pub_ready=$?
