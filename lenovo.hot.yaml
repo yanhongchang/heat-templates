@@ -67,7 +67,7 @@ resources:
         properties:
           name:
             str_replace:
-              template: $system_name-cpu-%index%
+              template: $system_name-cpu-host-%index%
               params:
                 $system_name: { get_param: system_name }
 
@@ -79,11 +79,6 @@ resources:
           br-storage-network_id: { get_param: [br_storage_net_cfg, network_id] }
           br-mgmt-network_id: { get_param: [br_mgmt_net_cfg, network_id] }
           br-mesh-network_id: { get_param: [br_mesh_net_cfg, network_id] }
-          
-          br-fw-admin_ipaddress: { get_param: [br_fw_admin_net_cfg, cpu_fixed_ip] }
-          br-storage_ipaddress: { get_param: [br_storage_net_cfg, cpu_fixed_ip] }
-          br-mgmt_ipaddress: { get_param: [br_mgmt_net_cfg, cpu_fixed_ip] }
-          br-mesh_ipaddress: { get_param: [br_mesh_net_cfg, cpu_fixed_ip] }  
           
           user_data:
             str_replace:
@@ -101,7 +96,8 @@ resources:
         properties:
           name:
             str_replace:
-              template: $system_name-ctrl-%index%
+              #template: $system_name-ctrl-node-%index%
+              template: $system_name-ctrl-node-378
               params:
                 $system_name: { get_param: system_name }
 
@@ -114,7 +110,7 @@ resources:
           net04-ext-network_id: { get_param: [net04_ext_net_cfg, network_id] }
           br-mgmt-network_id: { get_param: [br_mgmt_net_cfg, network_id] }
           br-mesh-network_id: { get_param: [br_mesh_net_cfg, network_id] }
-
+          
           net04-ext_subnet_id: { get_param: [net04_ext_net_cfg, subnet_id] }
           
           br-fw-admin_ipaddress: { get_param: [br_fw_admin_net_cfg, ctrl_fixed_ip] }
@@ -123,9 +119,8 @@ resources:
           net04-ext_ipaddress2: { get_param: [net04_ext_net_cfg, ctrl_fixed_ip2] }
           br-mgmt_ipaddress: { get_param: [br_mgmt_net_cfg, ctrl_fixed_ip] }
           br-mesh_ipaddress: { get_param: [br_mesh_net_cfg, ctrl_fixed_ip] }          
-
           
-          floating_network_id: { get_param: floating_network_id }
+          #floating_network_id: { get_param: floating_network_id }
 
           user_data:
             str_replace:

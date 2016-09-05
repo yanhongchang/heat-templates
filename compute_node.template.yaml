@@ -38,22 +38,6 @@ parameters:
     type: string
     default: "dddddd"
     description: 
-  br-fw-admin_ipaddress:
-    type: string
-    default: "dddddd"
-    description: 
-  br-storage_ipaddress:
-    type: string
-    default: "dddddd"
-    description: 
-  br-mgmt_ipaddress:
-    type: string
-    default: "dddddd"
-    description: 
-  br-mesh_ipaddress:
-    type: string
-    default: "dddddd"
-    description: 
   user_data:
     type: string
     default: "dddddd"
@@ -71,8 +55,6 @@ resources:
     properties:
       name: { get_param: name }
       network: { get_param: br-fw-admin-network_id }
-      fixed_ips:
-        - ip_address: { get_param: br-fw-admin_ipaddress }
 
   # Creat a new port.
   ETH1-br-storage:
@@ -80,8 +62,6 @@ resources:
     properties:
       name: "eth0"
       network: { get_param: br-storage-network_id }
-      fixed_ips:
-        - ip_address: { get_param: br-storage_ipaddress } 
 
   # Creat a new port.
   ETH2-br-mgmt:
@@ -89,8 +69,6 @@ resources:
     properties:
       name: "eth1"
       network: { get_param: br-mgmt-network_id }
-      fixed_ips:
-        - ip_address: { get_param: br-mgmt_ipaddress }
 
   # Creat a new port.
   ETH3-br-mesh:
@@ -98,8 +76,6 @@ resources:
     properties:
       name: "eth2"
       network: { get_param: br-mesh-network_id }
-      fixed_ips:
-        - ip_address: { get_param: br-mesh_ipaddress }
  
   ################################################################
   #              End: Create Port                                #

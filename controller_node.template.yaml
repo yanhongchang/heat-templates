@@ -107,6 +107,10 @@ resources:
     properties:
       name: { get_param: name }
       network: { get_param: net04-ext-network_id }
+      allowed_address_pairs: [
+          { "mac_address": "62:41:20:cd:a7:2b", "ip_address": {get_param: net04-ext_ipaddress2 }}, 
+          { "ip_address": {get_param: net04-ext_ipaddress1 }}
+        ]
       fixed_ips:
         - 
           subnet: { get_param: net04-ext_subnet_id }
