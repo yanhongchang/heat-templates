@@ -137,35 +137,13 @@ function rebootVM()
     fi
   done
 
-  echo "Successfully setup the NICs..."
+  echo "Successfully setup the NICs..." >> /home/lock.file
+  echo "DO NOT DELETE THIS FILE" >> /home/lock.file
 }
 
 ########################################################
 #		        MAIN			       #
 ########################################################
-
-# set mac address for b_public. It should be the same 
-# as is shown in allowed_address_pairs, which can be
-# displayed by "neutron port-show port_id".
-touch /home/setup_mac_addr_4_b_public.sh
-chmod 777 /home/setup_mac_addr_4_b_public.sh
-cat > /home/setup_mac_addr_4_b_public.sh <<EOF
-#!/bin/bash
-
-# check if the b_public is up before setup the mac address for it.
-
-is_b_pub_ready=1
-until [ ${is_b_pub_ready} -ne 1 ]
-do
-  ip netns exec haproxy ifconfig | grep b_public
-  is_b_pub_ready=$?
-  sleep 1
-done
-
-# setup the mac address for b_public in case we can ping it by the 
-# floating ip.
-ip netns exec haproxy ifconfig b_public hw ether 62:41:20:cd:a7:2b
-EOF
 
 set_bridges
 set_NIC
