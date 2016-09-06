@@ -64,7 +64,8 @@ EOF
 function set_NIC()
 {
   # set "dhcp" to "manual" for eth0~eth4.
-  for i in `ls *eth*`; do
+  for i in `ls ${NIC_DIR}/*eth*`
+  do
     sed -i "s/dhcp/manual/" $i
   done  
 }
