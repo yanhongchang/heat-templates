@@ -12,15 +12,23 @@ parameters:
   system_name:
     type: string
     default: "dev_openstack"
+  net_prefix_name:
+    type: string
+    default: "jeguan" 
+  sec_group_name:
+    type: string
+    default: "jeguan" 
   cpu_node_count:
     description: 'Number of compute nodes to create'
     type: number
     default: 1
   ctrl_node_count:
+    description: 'Number of compute nodes to create'
     type: number
-    description: 'Number of controller nodes to create'
-    constraints: 
-      - range: { min: 1, max: 1 }
+  ceph_node_count:
+    description: 'Number of ceph nodes to create'
+    type: number
+    default: 1
   image:
     type: json 
     default: 
@@ -41,45 +49,131 @@ parameters:
   ctrl_volume_size:
     type: string
     default: 1
-  net04_ext_net_cfg:
+  net04_ext_subnet_cfg:
     type: json 
-  br_fw_admin_net_cfg:
+    default:
+      {
+        "cidr": "192.168.100.0/24",
+        "gateway_ip": "192.168.100.1",
+        "ctrl_fixed_ip1": "192.168.100.63",
+        "ctrl_fixed_ip2": "192.168.100.61"        
+      }
+  br_fw_admin_subnet_cfg:
     type: json 
-  br_storage_net_cfg:
+    default:
+      {
+        "cidr": "10.20.0.0/24",
+        "gateway_ip": "10.20.0.1",
+        "ctrl_fixed_ip": "10.20.0.251"        
+      }
+  br_storage_subnet_cfg:
     type: json 
-  br_mgmt_net_cfg:
+    default:
+      {
+        "cidr": "192.168.120.0/24",
+        "gateway_ip": "192.168.120.1",
+        "ctrl_fixed_ip": "192.168.120.4"        
+      }
+  br_mgmt_subnet_cfg:
     type: json 
-  br_mesh_net_cfg:
+    default:
+      {
+        "cidr": "192.168.121.0/24",
+        "gateway_ip": "192.168.121.254",
+        "ctrl_fixed_ip": "192.168.121.3"        
+      }
+  br_mesh_subnet_cfg:
     type: json 
+    default:
+      {
+        "cidr": "192.168.123.0/24",
+        "gateway_ip": "192.168.123.1",
+        "ctrl_fixed_ip": "192.168.123.8"        
+      }
   floating_network_id:
     type: string
     default: "07cb6722-6986-4aba-8f4f-1a0556e51362"
+  ceph_ipaddress:
+    type: string
+    default: ""
 
 resources:
+
+  # Create the internal networks.
+  Lenovo-Networking:
+    type: Lenovo::Networking
+    properties:
+      sec_name_prefix: { get_param: sec_group_name }
+
+      net04_ext_prefix_name: { get_param: net_prefix_name }
+      net04_ext_subnet_cfg: { get_param: net04_ext_subnet_cfg }
+
+      br_fw_admin_prefix_name: { get_param: net_prefix_name }
+      br_fw_admin_subnet_cfg: { get_param: br_fw_admin_subnet_cfg }
+
+      br_storage_prefix_name: { get_param: net_prefix_name }
+      br_storage_subnet_cfg: { get_param: br_storage_subnet_cfg }
+
+      br_mgmt_prefix_name: { get_param: net_prefix_name }
+      br_mgmt_subnet_cfg: { get_param: br_mgmt_subnet_cfg }
+
+      br_mesh_prefix_name: { get_param: net_prefix_name } 
+      br_mesh_subnet_cfg: { get_param: br_mesh_subnet_cfg }
+
+      floating_network_id: { get_param: floating_network_id }
+
+  # Create ceph node.
+  Lenovo-Ceph-Group:
+    type: OS::Heat::ResourceGroup
+    depends_on: Lenovo-Networking
+    properties:
+      count: { get_param: ceph_node_count }
+      resource_def:
+        type: Lenovo::CephNode
+        properties:
+          indx: node%index%
+          name:
+            str_replace:
+              template: $system_nameCEPH-%index%
+              params:
+                $system_name: { get_param: system_name }
+
+          image: { get_param: [image, ceph_image] }
+          flavor: { get_param: [flavor, ceph_flavor] } 
+
+          ceph_ipaddress: { get_param: ceph_ipaddress }
+          private_network: { get_attr: [Lenovo-Networking, Private_Network] }
+          security_group: { get_attr: [Lenovo-Networking, Security_Group] }
+
+          user_data:
+            str_replace:
+              template: { get_file: userdata_ceph_node.sh }
+              params:
+                $node_countA: { get_param: ceph_node_count }
 
   # Create compute node.
   Lenovo-Compute-Group:
     type: OS::Heat::ResourceGroup
+    depends_on: Lenovo-Networking
     properties:
       count: { get_param: cpu_node_count }
       resource_def:
         type: Lenovo::ComputeNode
         properties:
+          indx: node%index%
           name:
             str_replace:
-              template: $system_name-cpu-host-%index%
+              template: $system_nameCPU-host-%index%
               params:
                 $system_name: { get_param: system_name }
 
           image: { get_param: [image, cpu_image] }
           flavor: { get_param: [flavor, cpu_flavor] } 
           volumeSize: { get_param: cpu_volume_size }
-          
-          br-fw-admin-network_id: { get_param: [br_fw_admin_net_cfg, network_id] }
-          br-storage-network_id: { get_param: [br_storage_net_cfg, network_id] }
-          br-mgmt-network_id: { get_param: [br_mgmt_net_cfg, network_id] }
-          br-mesh-network_id: { get_param: [br_mesh_net_cfg, network_id] }
-          
+
+          private_network: { get_attr: [Lenovo-Networking, Private_Network] }
+          security_group: { get_attr: [Lenovo-Networking, Security_Group] }
+
           user_data:
             str_replace:
               template: { get_file: userdata_compute_node.sh }
@@ -89,6 +183,7 @@ resources:
   # Create controller node.
   Lenovo-Controller-Group:
     type: OS::Heat::ResourceGroup
+    depends_on: Lenovo-Networking
     properties:
       count: { get_param: ctrl_node_count }
       resource_def:
@@ -96,8 +191,7 @@ resources:
         properties:
           name:
             str_replace:
-              #template: $system_name-ctrl-node-%index%
-              template: $system_name-ctrl-node-378
+              template: $system_nameCTRL-node-378
               params:
                 $system_name: { get_param: system_name }
 
@@ -105,23 +199,16 @@ resources:
           flavor: { get_param: [flavor, ctrl_flavor] } 
           volumeSize: { get_param: ctrl_volume_size }
           
-          br-fw-admin-network_id: { get_param: [br_fw_admin_net_cfg, network_id] }
-          br-storage-network_id: { get_param: [br_storage_net_cfg, network_id] }
-          net04-ext-network_id: { get_param: [net04_ext_net_cfg, network_id] }
-          br-mgmt-network_id: { get_param: [br_mgmt_net_cfg, network_id] }
-          br-mesh-network_id: { get_param: [br_mesh_net_cfg, network_id] }
+          br-fw-admin_ipaddress: { get_param: [br_fw_admin_subnet_cfg, ctrl_fixed_ip] }
+          br-storage_ipaddress: { get_param: [br_storage_subnet_cfg, ctrl_fixed_ip] }
+          net04-ext_ipaddress1: { get_param: [net04_ext_subnet_cfg, ctrl_fixed_ip1] }
+          net04-ext_ipaddress2: { get_param: [net04_ext_subnet_cfg, ctrl_fixed_ip2] }
+          br-mgmt_ipaddress: { get_param: [br_mgmt_subnet_cfg, ctrl_fixed_ip] }
+          br-mesh_ipaddress: { get_param: [br_mesh_subnet_cfg, ctrl_fixed_ip] }          
           
-          net04-ext_subnet_id: { get_param: [net04_ext_net_cfg, subnet_id] }
+          private_network: { get_attr: [Lenovo-Networking, Private_Network] }
+          security_group: { get_attr: [Lenovo-Networking, Security_Group] }
           
-          br-fw-admin_ipaddress: { get_param: [br_fw_admin_net_cfg, ctrl_fixed_ip] }
-          br-storage_ipaddress: { get_param: [br_storage_net_cfg, ctrl_fixed_ip] }
-          net04-ext_ipaddress1: { get_param: [net04_ext_net_cfg, ctrl_fixed_ip1] }
-          net04-ext_ipaddress2: { get_param: [net04_ext_net_cfg, ctrl_fixed_ip2] }
-          br-mgmt_ipaddress: { get_param: [br_mgmt_net_cfg, ctrl_fixed_ip] }
-          br-mesh_ipaddress: { get_param: [br_mesh_net_cfg, ctrl_fixed_ip] }          
-          
-          #floating_network_id: { get_param: floating_network_id }
-
           user_data:
             str_replace:
               template: { get_file: userdata_controller_node.sh }

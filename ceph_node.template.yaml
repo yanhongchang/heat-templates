@@ -1,20 +1,20 @@
 ## Author: Jeffrey Guan
-## Name: compute_node.template.yaml
+## Name: ceph_node.template.yaml
 ## Date: 2016-08-15
-## Note: create compute resources.
+## Note: create ceph resources.
 ## Version: Kilo
 
 heat_template_version: '2015-04-30'
 
-description: Compute server
+description: Ceph server
 
 parameters:
   name:
     type: string
-    default: "cpu_volume"
+    default: "ceph"
   image:
     type: string
-    default: "cirrors"
+    default: "ceph"
   flavor:
     type: string
     default: m1.small
@@ -33,10 +33,13 @@ parameters:
     default: " "
   security_group:
     type: json
+  ceph_ipaddress:
+    type: string
+    default: " "
     
 resources:
 
-## start of compute node definitions
+## start of ceph node definitions
 
   ################################################################
   #	            Begin: Create Port                           #
@@ -48,34 +51,15 @@ resources:
     properties:
       name: "eth0"
       network: { get_param: [private_network, br-fw-admin, network] }
-      
-  # Creat a new port.
-  ETH1-br-storage:
-    type: OS::Neutron::Port
-    properties:
-      name: "eth1"
-      network: { get_param: [private_network, br-storage, network] }
-
-  # Creat a new port.
-  ETH2-br-mgmt:
-    type: OS::Neutron::Port
-    properties:
-      name: "eth2"
-      network: { get_param: [private_network, br-mgmt, network] }
-
-  # Creat a new port.
-  ETH3-br-mesh:
-    type: OS::Neutron::Port
-    properties:
-      name: "eth3"
-      network: { get_param: [private_network, br-mesh, network] }
+      fixed_ips:
+        - ip_address: { get_param: ceph_ipaddress }
 
   ################################################################
   #	         End: Create Port                                #
   ################################################################
 
-  # Create compute node.
-  cpu_node:
+  # Create ceph node.
+  ceph_node:
     type: OS::Nova::Server
 #    depends_on: cpuVolume
     properties:
@@ -96,9 +80,6 @@ resources:
 
       networks:
         - port: { get_resource: ETH0-br-fw-admin }
-        - port: { get_resource: ETH1-br-storage }
-        - port: { get_resource: ETH2-br-mgmt }
-        - port: { get_resource: ETH3-br-mesh }
         
   # Create volume for compute node.
 #  cpuVolume:

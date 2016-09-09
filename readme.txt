@@ -1,1 +1,2 @@
-1. net04-ext only with one fixed IP and one floating IP
+1. the external network is pre-created.
+2. all internal networks are post-created automatically.
