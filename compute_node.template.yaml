@@ -48,6 +48,8 @@ resources:
     properties:
       name: "eth0"
       network: { get_param: [private_network, br-fw-admin, network] }
+      security_groups: 
+        - { get_param: [security_group, sec_group] }
       
   # Creat a new port.
   ETH1-br-storage:
@@ -55,6 +57,8 @@ resources:
     properties:
       name: "eth1"
       network: { get_param: [private_network, br-storage, network] }
+      security_groups: 
+        - { get_param: [security_group, sec_group] }
 
   # Creat a new port.
   ETH2-br-mgmt:
@@ -62,6 +66,8 @@ resources:
     properties:
       name: "eth2"
       network: { get_param: [private_network, br-mgmt, network] }
+      security_groups: 
+        - { get_param: [security_group, sec_group] }
 
   # Creat a new port.
   ETH3-br-mesh:
@@ -69,6 +75,8 @@ resources:
     properties:
       name: "eth3"
       network: { get_param: [private_network, br-mesh, network] }
+      security_groups: 
+        - { get_param: [security_group, sec_group] }
 
   ################################################################
   #	         End: Create Port                                #
@@ -88,7 +96,6 @@ resources:
       flavor: { get_param: flavor }
       config_drive: True
       image: { get_param: image }
-#      security_groups: { get_param: [security_group, sec_group] }
       user_data_format: RAW
       user_data: { get_param: user_data }
 #      block_device_mapping:

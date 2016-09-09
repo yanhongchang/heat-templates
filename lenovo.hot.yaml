@@ -122,64 +122,6 @@ resources:
 
       floating_network_id: { get_param: floating_network_id }
 
-  # Create ceph node.
-  Lenovo-Ceph-Group:
-    type: OS::Heat::ResourceGroup
-    depends_on: Lenovo-Networking
-    properties:
-      count: { get_param: ceph_node_count }
-      resource_def:
-        type: Lenovo::CephNode
-        properties:
-          indx: node%index%
-          name:
-            str_replace:
-              template: $system_nameCEPH-%index%
-              params:
-                $system_name: { get_param: system_name }
-
-          image: { get_param: [image, ceph_image] }
-          flavor: { get_param: [flavor, ceph_flavor] } 
-
-          ceph_ipaddress: { get_param: ceph_ipaddress }
-          private_network: { get_attr: [Lenovo-Networking, Private_Network] }
-          security_group: { get_attr: [Lenovo-Networking, Security_Group] }
-
-          user_data:
-            str_replace:
-              template: { get_file: userdata_ceph_node.sh }
-              params:
-                $node_countA: { get_param: ceph_node_count }
-
-  # Create compute node.
-  Lenovo-Compute-Group:
-    type: OS::Heat::ResourceGroup
-    depends_on: Lenovo-Networking
-    properties:
-      count: { get_param: cpu_node_count }
-      resource_def:
-        type: Lenovo::ComputeNode
-        properties:
-          indx: node%index%
-          name:
-            str_replace:
-              template: $system_nameCPU-host-%index%
-              params:
-                $system_name: { get_param: system_name }
-
-          image: { get_param: [image, cpu_image] }
-          flavor: { get_param: [flavor, cpu_flavor] } 
-          volumeSize: { get_param: cpu_volume_size }
-
-          private_network: { get_attr: [Lenovo-Networking, Private_Network] }
-          security_group: { get_attr: [Lenovo-Networking, Security_Group] }
-
-          user_data:
-            str_replace:
-              template: { get_file: userdata_compute_node.sh }
-              params:
-                $node_countA: { get_param: cpu_node_count }
-
   # Create controller node.
   Lenovo-Controller-Group:
     type: OS::Heat::ResourceGroup
@@ -214,5 +156,68 @@ resources:
               template: { get_file: userdata_controller_node.sh }
               params:
                 $DEFAULT_GATEWAY: { get_param: ctrl_node_count }
-#outputs:
+
+  # Create ceph node.
+  Lenovo-Ceph-Group:
+    type: OS::Heat::ResourceGroup
+    depends_on: [ Lenovo-Networking, Lenovo-Controller-Group ] 
+    properties:
+      count: { get_param: ceph_node_count }
+      resource_def:
+        type: Lenovo::CephNode
+        properties:
+          indx: node%index%
+          name:
+            str_replace:
+              template: $system_nameCEPH-%index%
+              params:
+                $system_name: { get_param: system_name }
+
+          image: { get_param: [image, ceph_image] }
+          flavor: { get_param: [flavor, ceph_flavor] } 
+
+          ceph_ipaddress: { get_param: ceph_ipaddress }
+          private_network: { get_attr: [Lenovo-Networking, Private_Network] }
+          security_group: { get_attr: [Lenovo-Networking, Security_Group] }
+
+          user_data:
+            str_replace:
+              template: { get_file: userdata_ceph_node.sh }
+              params:
+                $node_countA: { get_param: ceph_node_count }
+
+  # Create compute node.
+  Lenovo-Compute-Group:
+    type: OS::Heat::ResourceGroup
+    depends_on: [ Lenovo-Networking, Lenovo-Controller-Group ] 
+    properties:
+      count: { get_param: cpu_node_count }
+      resource_def:
+        type: Lenovo::ComputeNode
+        properties:
+          indx: node%index%
+          name:
+            str_replace:
+              template: $system_nameCPU-host-%index%
+              params:
+                $system_name: { get_param: system_name }
+
+          image: { get_param: [image, cpu_image] }
+          flavor: { get_param: [flavor, cpu_flavor] } 
+          volumeSize: { get_param: cpu_volume_size }
+
+          private_network: { get_attr: [Lenovo-Networking, Private_Network] }
+          security_group: { get_attr: [Lenovo-Networking, Security_Group] }
+
+          user_data:
+            str_replace:
+              template: { get_file: userdata_compute_node.sh }
+              params:
+                $node_countA: { get_param: cpu_node_count }
+
+outputs:
+  sec_group:
+    description: "security group output"
+    value: { get_param: security_group }
+    
 
