@@ -131,6 +131,7 @@ resources:
       resource_def:
         type: Lenovo::ControllerNode
         properties:
+          indx: ctrl-%index%
           name:
             str_replace:
               template: $system_name-CTRL-node-378

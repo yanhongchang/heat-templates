@@ -46,7 +46,12 @@ resources:
   ETH0-br-fw-admin:
     type: OS::Neutron::Port
     properties:
-      name: "eth0"
+      name: 
+        str_replace: 
+          template: $INDX-eth0
+          params: 
+            $INDX: { get_param: indx }
+
       network: { get_param: [private_network, br-fw-admin, network] }
       security_groups: 
         - { get_param: [security_group, sec_group] }
@@ -55,7 +60,11 @@ resources:
   ETH1-br-storage:
     type: OS::Neutron::Port
     properties:
-      name: "eth1"
+      name: 
+        str_replace: 
+          template: $INDX-eth1
+          params: 
+            $INDX: { get_param: indx }
       network: { get_param: [private_network, br-storage, network] }
       security_groups: 
         - { get_param: [security_group, sec_group] }
@@ -64,7 +73,12 @@ resources:
   ETH2-br-mgmt:
     type: OS::Neutron::Port
     properties:
-      name: "eth2"
+      name: 
+        str_replace: 
+          template: $INDX-eth2
+          params: 
+            $INDX: { get_param: indx }
+
       network: { get_param: [private_network, br-mgmt, network] }
       security_groups: 
         - { get_param: [security_group, sec_group] }
@@ -73,7 +87,12 @@ resources:
   ETH3-br-mesh:
     type: OS::Neutron::Port
     properties:
-      name: "eth3"
+      name:
+        str_replace: 
+          template: $INDX-eth3
+          params: 
+            $INDX: { get_param: indx }
+        
       network: { get_param: [private_network, br-mesh, network] }
       security_groups: 
         - { get_param: [security_group, sec_group] }
@@ -89,9 +108,9 @@ resources:
     properties:
       name:
         str_replace:
-          template: $hostname
+          template: $SERVER_NAME
           params:
-            $hostname: { get_param: name }
+            $SERVER_NAME: { get_param: name }
 
       flavor: { get_param: flavor }
       config_drive: True
