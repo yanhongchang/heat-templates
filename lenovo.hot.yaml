@@ -133,7 +133,7 @@ resources:
         properties:
           name:
             str_replace:
-              template: $system_nameCTRL-node-378
+              template: $system_name-CTRL-node-378
               params:
                 $system_name: { get_param: system_name }
 
@@ -166,10 +166,10 @@ resources:
       resource_def:
         type: Lenovo::CephNode
         properties:
-          indx: node%index%
+          indx: ceph-%index%
           name:
             str_replace:
-              template: $system_nameCEPH-%index%
+              template: $system_name-CEPH-%index%
               params:
                 $system_name: { get_param: system_name }
 
@@ -195,10 +195,10 @@ resources:
       resource_def:
         type: Lenovo::ComputeNode
         properties:
-          indx: node%index%
+          indx: host-%index%
           name:
             str_replace:
-              template: $system_nameCPU-host-%index%
+              template: $system_name-CPU-host-%index%
               params:
                 $system_name: { get_param: system_name }
 
@@ -209,12 +209,7 @@ resources:
           private_network: { get_attr: [Lenovo-Networking, Private_Network] }
           security_group: { get_attr: [Lenovo-Networking, Security_Group] }
 
-          user_data:
-            str_replace:
-              template: { get_file: userdata_compute_node.sh }
-              params:
-                $node_countA: { get_param: cpu_node_count }
-
+# outputs
 outputs:
   sec_group:
     description: "security group output"

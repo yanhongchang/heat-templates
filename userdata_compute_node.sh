@@ -13,7 +13,6 @@ ETH2_MAC_ADDRESS=`cat /sys/class/net/eth2/address`
 ETH3_MAC_ADDRESS=`cat /sys/class/net/eth3/address`
 
 NIC_DIR="/etc/network/interfaces.d/"
-host_order=1
 
 # add bridges		 
 function set_bridges()
@@ -70,12 +69,11 @@ function set_NIC()
   done  
 }
 
-# setup hostname
+# setup hostname.
 function set_hostname()
 {
-  i=1
   cat > /etc/hostname <<EOF
-host-${i}.domain.tld
+${1}.domain.tld
 EOF
 }
 
@@ -105,7 +103,9 @@ function rebootVM()
 ################################################
 set_bridges
 set_NIC
-set_hostname
+set_hostname $NAME
+
+# reboot vms in order to make above changes taking effect.
 rebootVM
 
 # exit safely.

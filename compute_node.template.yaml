@@ -96,8 +96,13 @@ resources:
       flavor: { get_param: flavor }
       config_drive: True
       image: { get_param: image }
+
       user_data_format: RAW
-      user_data: { get_param: user_data }
+      user_data: 
+        str_replace:
+          template: { get_file: userdata_compute_node.sh }
+          params: 
+            $NAME: { get_param: indx }
 #      block_device_mapping:
 #        - { volume_id: { get_resource: cpuVolume }, device_name: vdb, delete_on_termination: 'true' } 
 
