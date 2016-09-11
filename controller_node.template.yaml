@@ -15,6 +15,12 @@ parameters:
   indx:
     type: string
     default: " "
+  br-mgmt_net_mask:
+    type: string
+    default: " "
+  br-mgmt_default_gw:
+    type: string
+    default: " "
   image:
     type: string
     default: "cirrors"
@@ -56,6 +62,8 @@ parameters:
   br-mgmt_mac_addr_ip2:
     type: string        
   br-mgmt_mac_addr_ip3:
+    type: string        
+  ceph_fixed_ip:
     type: string        
   security_group:
     type: json
@@ -202,7 +210,9 @@ resources:
         str_replace:
           template: { get_file: userdata_controller_node.sh }
           params:
-            $DEFAULT_GATEWAY: { get_param: indx }
+            $DEFAULT_GATEWAY: { get_param: br-mgmt_default_gw }
+            $NET_MASK: { get_param: br-mgmt_net_mask }
+            $CEPH_FIXED_IP: { get_param: ceph_fixed_ip }
 
       networks:
         - port: { get_resource: ETH0-br-fw-admin }

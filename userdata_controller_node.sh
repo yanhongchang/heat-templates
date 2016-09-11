@@ -119,7 +119,14 @@ function set_mac_addr_4_NS()
   sed -i "s/haproxy/$1/g" /home/setup_mac_addr_4_${2}.sh  
   sed -i "s/b_public/$2/g" /home/setup_mac_addr_4_${2}.sh  
   sed -i "/hw ether/d" /home/setup_mac_addr_4_${2}.sh
-  sed -i "/# floating ip/a\\ip netns exec $1 ifconfig $2 hw ether $3" /home/setup_mac_addr_4_${2}.sh
+  sed -i "/# floating ip/a\\ip netns exec $1 ifconfig $2 hw ether $3" \
+         /home/setup_mac_addr_4_${2}.sh
+
+  if [ $2 == "b_vrouter" ]; then
+    sed -i "/netmask/d" /home/setup_mac_addr_4_${2}.sh
+    sed -i "/hw ether/a\\ip netns exec vrouter ifconfig b_vrouter $4 netmask $5" \
+           /home/setup_mac_addr_4_${2}.sh
+  fi
 
   sed -i "/setup_mac_addr_4_${2}/d" /etc/rc.local
   cat >> /etc/rc.local <<EOF
@@ -149,6 +156,16 @@ function rebootVM()
   echo "DO NOT DELETE THIS FILE" >> /home/lock.file
 }
 
+function install_ceph_client()
+{
+  python /home/sdx@10.100.218.73/install-cephclient.py controller  
+}
+
+function create_osd_pool()
+{
+  ceph osd pool create $1 $2
+}
+
 ########################################################
 #		        MAIN			       #
 ########################################################
@@ -159,10 +176,18 @@ set_NIC
 # set mac address for HA and vrouter.
 set_mac_addr_4_NS "haproxy" "b_public" "62:41:20:cd:a7:2b"
 set_mac_addr_4_NS "haproxy" "b_management" "96:4c:66:b3:4a:a9"
-set_mac_addr_4_NS "vrouter" "b_vrouter" "9e:38:59:e7:58:be"
+set_mac_addr_4_NS "vrouter" "b_vrouter" "9e:38:59:e7:58:be" $DEFAULT_GATEWAY $NET_MASK
 set_mac_addr_4_NS "vrouter" "b_vrouter_pub" "8a:b1:73:45:2c:83"
 
-# reboot vms to make changes taking effective
+# setup ceph client.
+#install_ceph_client
+
+#create_osd_pool "vms88" "128"
+#create_osd_pool "volumes88" "128"
+#create_osd_pool "images88" "128"
+#create_osd_pool "backups88" "128"
+
+# reboot vms to make changes taking effective.
 rebootVM
 
 # exit safely.

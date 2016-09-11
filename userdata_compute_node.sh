@@ -41,10 +41,6 @@ auto br-mgmt
 iface br-mgmt inet dhcp
 bridge-ports eth2
 EOF
-  # add the br-mgmt's default gw into routing table.
-  cat >> /etc/rc.local <<EOF
-up route add default gw ${1}
-EOF 
 
   # br-mesh: set route for 169.254.169.254.
   touch ${NIC_DIR}/ifcfg-br-mesh
@@ -100,6 +96,11 @@ function rebootVM()
 #		  MAIN			       #
 ################################################
 set_bridges $DEFAULT_GW_BR_MGMT
+
+# add the br-mgmt's default gw into routing table.
+sed -i "/flock/a\\up route add default gw $DEFAULT_GW_BR_MGMT" \
+       /etc/rc.local
+
 set_NIC
 set_hostname $NAME
 

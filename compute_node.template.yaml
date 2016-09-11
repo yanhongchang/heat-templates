@@ -31,6 +31,9 @@ parameters:
   default_gw_br-mgmt:
     type: string 
     description: 
+  ceph_fixed_ip:
+    type: string 
+    description: 
   security_group:
     type: json
   fixed_ip_br_mgmt:
@@ -135,6 +138,7 @@ resources:
           params: 
             $NAME: { get_param: indx }
             $DEFAULT_GW_BR_MGMT: { get_param: default_gw_br-mgmt }
+            $CEPH_FIXED_IP: { get_param: ceph_fixed_ip }
 
       networks:
         - port: { get_resource: ETH0-br-fw-admin }
