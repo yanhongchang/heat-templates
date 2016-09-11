@@ -208,6 +208,7 @@ resources:
       enable_dhcp: true
       cidr: { get_param: [br_mesh_subnet_cfg, cidr] }
       gateway_ip: { get_param: [br_mesh_subnet_cfg, gateway_ip] }
+
   ################################################################
   #	            End: Create Network 	                         #
   ################################################################

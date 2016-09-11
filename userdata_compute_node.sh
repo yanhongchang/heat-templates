@@ -12,14 +12,15 @@ ETH1_MAC_ADDRESS=`cat /sys/class/net/eth1/address`
 ETH2_MAC_ADDRESS=`cat /sys/class/net/eth2/address`
 ETH3_MAC_ADDRESS=`cat /sys/class/net/eth3/address`
 
-NIC_DIR="/etc/network/interfaces.d/"
+NIC_DIR="/etc/network/interfaces.d"
 
-# add bridges		 
+# add bridges.		 
+# usage: set_bridges $default_gw_br-mgmt
 function set_bridges()
 {
-  # br-fw-admin: setup br-fw-admin
+  # br-fw-admin: setup br-fw-admin.
   touch ${NIC_DIR}/ifcfg-br-fw-admin
-  cat >>${NIC_DIR}/ifcfg-br-fw-admin <<EOF
+  cat > ${NIC_DIR}/ifcfg-br-fw-admin <<EOF
 auto br-fw-admin
 iface br-fw-admin inet dhcp
 bridge-ports eth0
@@ -27,7 +28,7 @@ EOF
 
   # br-storage: set br-storage's mac address and setup the route.
   touch ${NIC_DIR}/ifcfg-br-storage
-  cat >> ${NIC_DIR}/ifcfg-br-storage <<EOF
+  cat > ${NIC_DIR}/ifcfg-br-storage <<EOF
 auto br-storage
 iface br-storage inet dhcp
 bridge-ports eth1
@@ -35,31 +36,28 @@ EOF
 
   # br-mgmt: 
   touch ${NIC_DIR}/ifcfg-br-mgmt
-  cat >> ${NIC_DIR}/ifcfg-br-mgmt <<EOF
+  cat > ${NIC_DIR}/ifcfg-br-mgmt <<EOF
 auto br-mgmt
 iface br-mgmt inet dhcp
 bridge-ports eth2
 EOF
-  sed -i "/^up route add/d" /etc/rc.local
-  sed -i "/^ifconfig br-mgmt/d" /etc/rc.local
-  sed -i "/^$/d" /etc/rc.local
+  # add the br-mgmt's default gw into routing table.
+  cat >> /etc/rc.local <<EOF
+up route add default gw ${1}
+EOF 
 
-  # br-mesh: set route for 169.254.169.254
+  # br-mesh: set route for 169.254.169.254.
   touch ${NIC_DIR}/ifcfg-br-mesh
-  cat >> ${NIC_DIR}/ifcfg-br-mesh <<EOF
+  cat > ${NIC_DIR}/ifcfg-br-mesh <<EOF
 auto br-mesh
 iface br-mesh inet dhcp
 bridge-ports eth3
-EOF
-  sed -i "/^up route/d" ${NIC_DIR}/ifcfg-br-mesh
-  sed -i "/^$/d" ${NIC_DIR}/ifcfg-br-mesh
-  cat >>${NIC_DIR}/ifcfg-br-mesh <<EOF
 up route add -host 169.254.169.254 dev br-mesh
 EOF
 
 }
 
-# setup NICs		 
+# setup NICs.		 
 function set_NIC()
 {
   # set "dhcp" to "manual" for eth0~eth4.
@@ -101,7 +99,7 @@ function rebootVM()
 ################################################
 #		  MAIN			       #
 ################################################
-set_bridges
+set_bridges $DEFAULT_GW_BR_MGMT
 set_NIC
 set_hostname $NAME
 

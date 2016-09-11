@@ -109,14 +109,21 @@ function set_NIC()
   done  
 }
 
-
 # setup mac address for b_public in haproxy ns
-function set_mac_addr_4_b_pub()
+# usage: set_mac_addr_4_HA haproxy b_public mac_address
+#        set_mac_addr_4_HA vrouter b_vrouter mac_address
+function set_mac_addr_4_NS()
 {
-  # add the script into rc.local in case if will run every booting.
-  sed -i "/setup_mac_addr_4_b_public/d" /etc/rc.local
-  cat >> /etc/rc.local <<EOF 
-sh "/home/setup_mac_addr_4_b_public.sh" &
+  cp /home/setup_mac_addr_4_b_public.sh /home/setup_mac_addr_4_${2}.sh
+
+  sed -i "s/haproxy/$1/g" /home/setup_mac_addr_4_${2}.sh  
+  sed -i "s/b_public/$2/g" /home/setup_mac_addr_4_${2}.sh  
+  sed -i "/hw ether/d" /home/setup_mac_addr_4_${2}.sh
+  sed -i "/# floating ip/a\\ip netns exec $1 ifconfig $2 hw ether $3" /home/setup_mac_addr_4_${2}.sh
+
+  sed -i "/setup_mac_addr_4_${2}/d" /etc/rc.local
+  cat >> /etc/rc.local <<EOF
+sh "/home/setup_mac_addr_4_${2}.sh" &
 EOF
 }
 
@@ -148,7 +155,14 @@ function rebootVM()
 
 set_bridges
 set_NIC
-set_mac_addr_4_b_pub
+
+# set mac address for HA and vrouter.
+set_mac_addr_4_NS "haproxy" "b_public" "62:41:20:cd:a7:2b"
+set_mac_addr_4_NS "haproxy" "b_management" "96:4c:66:b3:4a:a9"
+set_mac_addr_4_NS "vrouter" "b_vrouter" "9e:38:59:e7:58:be"
+set_mac_addr_4_NS "vrouter" "b_vrouter_pub" "8a:b1:73:45:2c:83"
+
+# reboot vms to make changes taking effective
 rebootVM
 
 # exit safely.

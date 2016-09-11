@@ -24,6 +24,8 @@ parameters:
     default: 1
   ctrl_node_count:
     description: 'Number of compute nodes to create'
+    constraints: 
+      - range: { min: 0, max: 1 }
     type: number
   ceph_node_count:
     description: 'Number of ceph nodes to create'
@@ -144,20 +146,24 @@ resources:
           
           br-fw-admin_ipaddress: { get_param: [br_fw_admin_subnet_cfg, ctrl_fixed_ip] }
           br-storage_ipaddress: { get_param: [br_storage_subnet_cfg, ctrl_fixed_ip] }
+
           net04-ext_ipaddress1: { get_param: [net04_ext_subnet_cfg, ctrl_fixed_ip1] }
           net04-ext_ipaddress2: { get_param: [net04_ext_subnet_cfg, ctrl_fixed_ip2] }
-          br-mgmt_ipaddress: { get_param: [br_mgmt_subnet_cfg, ctrl_fixed_ip] }
+          net04-ext_ipaddress3: { get_param: [net04_ext_subnet_cfg, ctrl_fixed_ip3] }
+          net04-ext_mac_addr_ip2: { get_param: [net04_ext_subnet_cfg, ctrl_mac_addr_ip2] }
+          net04-ext_mac_addr_ip3: { get_param: [net04_ext_subnet_cfg, ctrl_mac_addr_ip3] }
+
+          br-mgmt_ipaddress1: { get_param: [br_mgmt_subnet_cfg, ctrl_fixed_ip] }
+          br-mgmt_ipaddress2: { get_param: [br_mgmt_subnet_cfg, ctrl_fixed_ip2] }
+          br-mgmt_ipaddress3: { get_param: [br_mgmt_subnet_cfg, gateway_ip] }
+          br-mgmt_mac_addr_ip2: { get_param: [br_mgmt_subnet_cfg, ctrl_mac_addr_ip2] }
+          br-mgmt_mac_addr_ip3: { get_param: [br_mgmt_subnet_cfg, ctrl_gateway_mac_addr_ip3] }
+
           br-mesh_ipaddress: { get_param: [br_mesh_subnet_cfg, ctrl_fixed_ip] }          
           
           private_network: { get_attr: [Lenovo-Networking, Private_Network] }
           security_group: { get_attr: [Lenovo-Networking, Security_Group] }
           
-          user_data:
-            str_replace:
-              template: { get_file: userdata_controller_node.sh }
-              params:
-                $DEFAULT_GATEWAY: { get_param: ctrl_node_count }
-
   # Create ceph node.
   Lenovo-Ceph-Group:
     type: OS::Heat::ResourceGroup
@@ -181,12 +187,6 @@ resources:
           private_network: { get_attr: [Lenovo-Networking, Private_Network] }
           security_group: { get_attr: [Lenovo-Networking, Security_Group] }
 
-          user_data:
-            str_replace:
-              template: { get_file: userdata_ceph_node.sh }
-              params:
-                $node_countA: { get_param: ceph_node_count }
-
   # Create compute node.
   Lenovo-Compute-Group:
     type: OS::Heat::ResourceGroup
@@ -208,7 +208,16 @@ resources:
           volumeSize: { get_param: cpu_volume_size }
 
           private_network: { get_attr: [Lenovo-Networking, Private_Network] }
+          default_gw_br-mgmt: { get_param: [br_mgmt_subnet_cfg, gateway_ip] }
           security_group: { get_attr: [Lenovo-Networking, Security_Group] }
+          
+          # If there are more than 8 controller nodes are defined, the following 
+          # code should be updated, otherwise it will cause the ip confliction.          
+          fixed_ip_br_mgmt: 
+            str_replace:
+              template: 192.168.121.$INDEX
+              params:
+                $INDEX: 1%index%
 
 # outputs
 outputs:

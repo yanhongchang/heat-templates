@@ -35,18 +35,30 @@ parameters:
     type: string
   br-storage_ipaddress:
     type: string
-  br-mgmt_ipaddress:
-    type: string
   br-mesh_ipaddress:
     type: string 
   net04-ext_ipaddress1:
     type: string
   net04-ext_ipaddress2:
     type: string        
+  net04-ext_ipaddress3:
+    type: string        
+  net04-ext_mac_addr_ip2:
+    type: string        
+  net04-ext_mac_addr_ip3:
+    type: string        
+  br-mgmt_ipaddress1:
+    type: string
+  br-mgmt_ipaddress2:
+    type: string        
+  br-mgmt_ipaddress3:
+    type: string        
+  br-mgmt_mac_addr_ip2:
+    type: string        
+  br-mgmt_mac_addr_ip3:
+    type: string        
   security_group:
     type: json
-  user_data:
-    type: string        
 
 resources:
 
@@ -100,10 +112,23 @@ resources:
       network:  { get_param: [private_network, net04_ext, network] }
       security_groups: 
         - { get_param: [security_group, sec_group] }
+
+      # These three IPs are binded to the same port. 
+      # net04-ext_ipaddress2: b_public ip address in haproxy namespace;
+      # net04-ext_ipaddress3: v_vrouter_pub ip address in vrouter namespace;
+      # net04-ext_ipaddress1: br-ex ip address.
+      # The MAC address for net04-ext_ipaddress2 and net04-ext_ipaddress3 will always change
+      # in case of reboot, Please DO hard-code these MACs in the shell script.
       allowed_address_pairs: [
-          { "mac_address": "62:41:20:cd:a7:2b", "ip_address": {get_param: net04-ext_ipaddress2 }}, 
+          { "mac_address": { get_param: net04-ext_mac_addr_ip2 }, "ip_address": {get_param: net04-ext_ipaddress2 }}, 
+          { "mac_address": { get_param: net04-ext_mac_addr_ip3 }, "ip_address": {get_param: net04-ext_ipaddress3 }}, 
           { "ip_address": {get_param: net04-ext_ipaddress1 }}
         ]
+
+      # Two fixed ips are binded to this port. 
+      # The net04-ext_ipaddress2 is for front-end;  
+      # The net04-ext_ipaddress1 is for back-end.  
+      # Both of them will be associated with floating ips.
       fixed_ips:
         - 
           subnet: { get_param: [private_network, net04_ext, subnet] }
@@ -125,8 +150,17 @@ resources:
       network: { get_param: [private_network, br-mgmt, network] }
       security_groups: 
         - { get_param: [security_group, sec_group] }
+      # br-mgmt_ipaddress2: b_management's ip address in haproxy namespace;
+      # br-mgmt_ipaddress3: b_vrouter's ip address in vrouter namespace;
+      # br-mgmt_ipaddress1: br-mgmt's ip address. 
+      allowed_address_pairs: [
+          { "mac_address": { get_param: br-mgmt_mac_addr_ip2 }, "ip_address": {get_param: br-mgmt_ipaddress2 }}, 
+          { "mac_address": { get_param: br-mgmt_mac_addr_ip3 }, "ip_address": {get_param: br-mgmt_ipaddress3 }}, 
+          { "ip_address": {get_param: br-mgmt_ipaddress1 }}
+        ]
+
       fixed_ips:
-        - ip_address: { get_param: br-mgmt_ipaddress }
+        - ip_address: { get_param: br-mgmt_ipaddress1 }
 
   # Creat a new port.
   ETH4-br-mesh:
@@ -162,10 +196,13 @@ resources:
       flavor: { get_param: flavor }
       config_drive: True
       image: { get_param: image }
+
       user_data_format: RAW
-      user_data: { get_param: user_data }
-#      block_device_mapping:
-#        - { volume_id: { get_resource: ctrlVolume}, device_name: vdb, delete_on_termination: 'true' }
+      user_data:
+        str_replace:
+          template: { get_file: userdata_controller_node.sh }
+          params:
+            $DEFAULT_GATEWAY: { get_param: indx }
 
       networks:
         - port: { get_resource: ETH0-br-fw-admin }
@@ -173,6 +210,10 @@ resources:
         - port: { get_resource: ETH2-net04-ext }
         - port: { get_resource: ETH3-br-mgmt }
         - port: { get_resource: ETH4-br-mesh }
+
+#      block_device_mapping:
+#        - { volume_id: { get_resource: ctrlVolume}, device_name: vdb, delete_on_termination: 'true' }
+
 
   # Create volume for controller node.
 #  ctrlVolume:

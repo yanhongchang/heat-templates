@@ -28,11 +28,20 @@ parameters:
   indx:
     type: string 
     description: 
-  user_data:
-    type: string
-    default: " "
+  default_gw_br-mgmt:
+    type: string 
+    description: 
   security_group:
     type: json
+  fixed_ip_br_mgmt:
+    type: string 
+    description: "used by br-mgmt to limit the ips can only start
+                  with 192.168.121.10. Please be aware of the
+                  following ips are in use:
+                  192.168.121.1 is for dhcp server;
+                  192.168.121.2 is for b_management in haproxy;
+                  192.168.121.3 is for controller.
+                 "
     
 resources:
 
@@ -83,6 +92,9 @@ resources:
       security_groups: 
         - { get_param: [security_group, sec_group] }
 
+      fixed_ips:
+        - ip_address: { get_param: fixed_ip_br_mgmt }
+
   # Creat a new port.
   ETH3-br-mesh:
     type: OS::Neutron::Port
@@ -122,14 +134,17 @@ resources:
           template: { get_file: userdata_compute_node.sh }
           params: 
             $NAME: { get_param: indx }
-#      block_device_mapping:
-#        - { volume_id: { get_resource: cpuVolume }, device_name: vdb, delete_on_termination: 'true' } 
+            $DEFAULT_GW_BR_MGMT: { get_param: default_gw_br-mgmt }
 
       networks:
         - port: { get_resource: ETH0-br-fw-admin }
         - port: { get_resource: ETH1-br-storage }
         - port: { get_resource: ETH2-br-mgmt }
         - port: { get_resource: ETH3-br-mesh }
+
+#      block_device_mapping:
+#        - { volume_id: { get_resource: cpuVolume }, device_name: vdb, delete_on_termination: 'true' } 
+
         
   # Create volume for compute node.
 #  cpuVolume:
