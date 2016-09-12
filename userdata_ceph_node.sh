@@ -45,10 +45,14 @@ sed -i "s/192.168.100.85/$IP_ADDR/g" /etc/ceph/ceph.conf
 rm -rf /Ceph/Data/Osd/osd-0/*
 rm -rf /Ceph/Data/Mon/*
 
+# delete the known_hosts, otherwise cannot ssh to $IP_ADDR.
+rm /root/.ssh/known_hosts
+
 # 3. mount the disk.
 # 4. format.
-# 5. start ceph
+# 5. start ceph.
 mount_disk && format_disk && start_ceph
 
+# just check if the cloud-init is workable.
 touch /home/lock.file
 

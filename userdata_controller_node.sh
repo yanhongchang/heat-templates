@@ -114,7 +114,7 @@ function set_NIC()
 #        set_mac_addr_4_HA vrouter b_vrouter mac_address
 function set_mac_addr_4_NS()
 {
-  cp /home/setup_mac_addr_4_b_public.sh /home/setup_mac_addr_4_${2}.sh
+  cp /home/setup_mac_addresss_4_b_public.sh /home/setup_mac_addr_4_${2}.sh
 
   sed -i "s/haproxy/$1/g" /home/setup_mac_addr_4_${2}.sh  
   sed -i "s/b_public/$2/g" /home/setup_mac_addr_4_${2}.sh  
@@ -158,6 +158,7 @@ function rebootVM()
 
 function install_ceph_client()
 {
+  sed -i "s/10.20.9/$CEPH_FIXED_IP/g" /etc/ceph/ceph.conf
   python /home/sdx@10.100.218.73/install-cephclient.py controller  
 }
 
@@ -166,6 +167,15 @@ function create_osd_pool()
   ceph osd pool create $1 $2
 }
 
+function setup_glance_conf()
+{
+  echo "will add..."
+}
+
+function setup_cinder_conf()
+{
+  echo "will add..."
+}
 ########################################################
 #		        MAIN			       #
 ########################################################
@@ -179,13 +189,16 @@ set_mac_addr_4_NS "haproxy" "b_management" "96:4c:66:b3:4a:a9"
 set_mac_addr_4_NS "vrouter" "b_vrouter" "9e:38:59:e7:58:be" $DEFAULT_GATEWAY $NET_MASK
 set_mac_addr_4_NS "vrouter" "b_vrouter_pub" "8a:b1:73:45:2c:83"
 
-# setup ceph client.
+# update /etc/ceph/ceph.conf and install ceph client.
 #install_ceph_client
 
 #create_osd_pool "vms88" "128"
 #create_osd_pool "volumes88" "128"
 #create_osd_pool "images88" "128"
 #create_osd_pool "backups88" "128"
+
+#setup_glance_conf 
+#setup_cinder_conf
 
 # reboot vms to make changes taking effective.
 rebootVM

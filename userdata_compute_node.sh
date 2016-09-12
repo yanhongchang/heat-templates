@@ -92,6 +92,16 @@ function rebootVM()
   echo "Successfully setup the NICs..."
 }
 
+function install_ceph_client()
+{
+  sed -i "s/10.20.9/$CEPH_FIXED_IP/g" /etc/ceph/ceph.conf
+  python /home/sdx@10.100.218.73/install-cephclient.py compute
+}
+
+function setup_nova_conf()
+{
+  echo "will add..."
+}
 ################################################
 #		  MAIN			       #
 ################################################
