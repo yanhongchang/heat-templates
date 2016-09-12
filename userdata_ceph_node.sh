@@ -50,5 +50,5 @@ rm -rf /Ceph/Data/Mon/*
 # 5. start ceph
 mount_disk && format_disk && start_ceph
 
-
+touch /home/lock.file
 

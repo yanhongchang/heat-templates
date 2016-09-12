@@ -197,7 +197,7 @@ resources:
   # Create compute node.
   Lenovo-Compute-Group:
     type: OS::Heat::ResourceGroup
-    depends_on: [ Lenovo-Networking, Lenovo-Controller-Group ] 
+    depends_on: [ Lenovo-Networking, Lenovo-Controller-Group ]
     properties:
       count: { get_param: cpu_node_count }
       resource_def:
