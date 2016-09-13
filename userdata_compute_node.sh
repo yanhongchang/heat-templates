@@ -115,6 +115,13 @@ sed -i "/flock/a\\up route add default gw $DEFAULT_GW_BR_MGMT" \
 set_NIC
 set_hostname $NAME
 
+# set the proper user for KVM to avoid the following ERROR:
+# "Could not access KVM kernel module: Permission denied\nfailed 
+# to initialize KVM"
+sed -i "s/^#user = \"root\"/user = \"root\"/" /etc/libvirt/qemu.conf
+sed -i "s/^#group = \"root\"/group = \"root\"/" /etc/libvirt/qemu.conf
+service libvirtd restart
+
 install_ceph_client && setup_nova_conf
 
 # reboot vms in order to make above changes taking effect.

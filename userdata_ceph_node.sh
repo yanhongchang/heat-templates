@@ -93,7 +93,7 @@ EOF
 
 # 1. get the NIC ip and set the ceph.conf.
 IP_ADDR=`get_ip "eth0"`
-sed -i "s/192.168.100.85/$IP_ADDR/g" /etc/ceph/ceph.conf
+sed -i "s/10.20.0.9/$IP_ADDR/g" /etc/ceph/ceph.conf
 
 # 2. clear data.
 rm -rf /Ceph/Data/Osd/osd-0/*
