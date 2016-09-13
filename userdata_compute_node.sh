@@ -94,7 +94,7 @@ function rebootVM()
 
 function install_ceph_client()
 {
-  sed -i "s/10.20.9/$CEPH_FIXED_IP/g" /etc/ceph/ceph.conf
+  sed -i "s/10.20.0.9/$CEPH_FIXED_IP/g" /etc/ceph/ceph.conf
   python /home/sdx@10.100.218.73/install-cephclient.py compute
 }
 
@@ -102,6 +102,7 @@ function setup_nova_conf()
 {
   echo "will add..."
 }
+
 ################################################
 #		  MAIN			       #
 ################################################
@@ -113,6 +114,8 @@ sed -i "/flock/a\\up route add default gw $DEFAULT_GW_BR_MGMT" \
 
 set_NIC
 set_hostname $NAME
+
+install_ceph_client && setup_nova_conf
 
 # reboot vms in order to make above changes taking effect.
 rebootVM

@@ -119,7 +119,7 @@ function set_mac_addr_4_NS()
   sed -i "s/haproxy/$1/g" /home/setup_mac_addr_4_${2}.sh  
   sed -i "s/b_public/$2/g" /home/setup_mac_addr_4_${2}.sh  
   sed -i "/hw ether/d" /home/setup_mac_addr_4_${2}.sh
-  sed -i "/# floating ip/a\\ip netns exec $1 ifconfig $2 hw ether $3" \
+  sed -i "/# by floating ip/a\\ip netns exec $1 ifconfig $2 hw ether $3" \
          /home/setup_mac_addr_4_${2}.sh
 
   if [ $2 == "b_vrouter" ]; then
@@ -158,7 +158,7 @@ function rebootVM()
 
 function install_ceph_client()
 {
-  sed -i "s/10.20.9/$CEPH_FIXED_IP/g" /etc/ceph/ceph.conf
+  sed -i "s/10.20.0.9/$CEPH_FIXED_IP/g" /etc/ceph/ceph.conf
   python /home/sdx@10.100.218.73/install-cephclient.py controller  
 }
 
@@ -169,12 +169,13 @@ function create_osd_pool()
 
 function setup_glance_conf()
 {
-  echo "will add..."
+  sed -i "s/images10/$1/g" /etc/glance/glance-api.conf
 }
 
 function setup_cinder_conf()
 {
-  echo "will add..."
+  sed -i "s/volumes10/$1/g" /etc/cinder/cinder.conf
+  sed -i "s/backups10/$2/g" /etc/cinder/cinder.conf
 }
 ########################################################
 #		        MAIN			       #
@@ -190,15 +191,15 @@ set_mac_addr_4_NS "vrouter" "b_vrouter" "9e:38:59:e7:58:be" $DEFAULT_GATEWAY $NE
 set_mac_addr_4_NS "vrouter" "b_vrouter_pub" "8a:b1:73:45:2c:83"
 
 # update /etc/ceph/ceph.conf and install ceph client.
-#install_ceph_client
+install_ceph_client
 
-#create_osd_pool "vms88" "128"
-#create_osd_pool "volumes88" "128"
-#create_osd_pool "images88" "128"
-#create_osd_pool "backups88" "128"
+create_osd_pool "vms88" "128"
+create_osd_pool "volumes88" "128"
+create_osd_pool "images88" "128"
+create_osd_pool "backups88" "128"
 
-#setup_glance_conf 
-#setup_cinder_conf
+setup_glance_conf "images88"
+setup_cinder_conf "volumes88" "backups88"
 
 # reboot vms to make changes taking effective.
 rebootVM

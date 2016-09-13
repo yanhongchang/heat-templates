@@ -16,21 +16,75 @@ function get_ip()
 # mount the disk.
 function mount_disk()
 {
+  # check if the /dev/vda4 is mounted.
+  mount | grep "/dev/vda4"
+  check_mount=$?
+
+  # umount /dev/vda4 if it is mounted.
+  if [ 0 -eq ${check_mount} ]; then
+    umount /dev/vda4
+  fi
+
   /usr/sbin/mkfs.f2fs /home/f2fs.conf
+
   chmod 777 /home/mount.sh
   sh /home/mount.sh
 }
 
-# format the disk.
-function format_disk()
+# create ceph fs.
+function create_cephfs()
 {
-  /sbin/mkcephfs -a -c /etc/ceph/ceph.conf
+  if [ ! -e /home/create_cephfs.sh ]; then
+    touch /home/create_cephfs.sh
+  fi
+
+  # delete the known_hosts, otherwise cannot ssh to $IP_ADDR.
+  if [ -e /root/.ssh/known_hosts ]; then
+    rm /root/.ssh/known_hosts
+  fi
+
+# to erease the interaction.
+  cat > /home/create_cephfs.sh <<EOF
+#!/usr/bin/expect
+
+# create the ceph fs.
+spawn /sbin/mkcephfs -a -c /etc/ceph/ceph.conf
+expect {
+  "(yes/no)" { send "yes\r"; exp_continue }
+  eof
+}
+EOF
+
+  chmod 777 /home/create_cephfs.sh
+  /home/create_cephfs.sh
 }
 
 # start ceph.
 function start_ceph()
 {
-  /etc/init.d/ceph -a -c /etc/ceph/ceph.conf start
+  if [ ! -e /home/start_ceph.sh ]; then
+    touch /home/start_ceph.sh
+  fi
+
+  # delete the known_hosts, otherwise cannot ssh to $IP_ADDR.
+  if [ -e /root/.ssh/known_hosts ]; then
+    rm /root/.ssh/known_hosts
+  fi
+
+# to erease the interaction.
+  cat > /home/start_ceph.sh <<EOF
+#!/usr/bin/expect
+
+# start ceph
+spawn /etc/init.d/ceph -a -c /etc/ceph/ceph.conf start
+expect {
+  "(yes/no)" { send "yes\r"; exp_continue }
+  eof
+}
+EOF
+
+  chmod 777 /home/start_ceph.sh
+  /home/start_ceph.sh
 }
 
 ####################################################
@@ -46,12 +100,14 @@ rm -rf /Ceph/Data/Osd/osd-0/*
 rm -rf /Ceph/Data/Mon/*
 
 # delete the known_hosts, otherwise cannot ssh to $IP_ADDR.
-rm /root/.ssh/known_hosts
+if [ -e /root/.ssh/known_hosts ]; then
+  rm /root/.ssh/known_hosts
+fi
 
 # 3. mount the disk.
 # 4. format.
 # 5. start ceph.
-mount_disk && format_disk && start_ceph
+mount_disk && create_cephfs && start_ceph
 
 # just check if the cloud-init is workable.
 touch /home/lock.file
