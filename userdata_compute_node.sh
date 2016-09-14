@@ -100,7 +100,7 @@ function install_ceph_client()
 
 function setup_nova_conf()
 {
-  echo "will add..."
+  sed -i "s/vms88/$1/g" /etc/nova/nova.conf
 }
 
 ################################################
@@ -109,7 +109,7 @@ function setup_nova_conf()
 set_bridges $DEFAULT_GW_BR_MGMT
 
 # add the br-mgmt's default gw into routing table.
-sed -i "/flock/a\\up route add default gw $DEFAULT_GW_BR_MGMT" \
+sed -i "/flock/a\\route add default gw $DEFAULT_GW_BR_MGMT" \
        /etc/rc.local
 
 set_NIC
@@ -122,7 +122,7 @@ sed -i "s/^#user = \"root\"/user = \"root\"/" /etc/libvirt/qemu.conf
 sed -i "s/^#group = \"root\"/group = \"root\"/" /etc/libvirt/qemu.conf
 service libvirtd restart
 
-install_ceph_client && setup_nova_conf
+install_ceph_client && setup_nova_conf "vms88"
 
 # reboot vms in order to make above changes taking effect.
 rebootVM
