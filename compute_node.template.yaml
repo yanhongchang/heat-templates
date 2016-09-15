@@ -40,12 +40,12 @@ parameters:
     type: number
   fixed_ip_br_mgmt:
     type: string 
-    description: " used by br-mgmt to limit the ips can only start"
-                 " with 192.168.121.10. Please be aware of the"
-                 " following ips are in use:"
-                 " 192.168.121.1 is for dhcp server;"
-                 " 192.168.121.2 is for b_management in haproxy;"
-                 " 192.168.121.3 is for controller."
+    description: " used by br-mgmt to limit the ips can only start
+                  with 192.168.121.10. Please be aware of the
+                  following ips are in use:
+                  192.168.121.1 is for dhcp server;
+                  192.168.121.2 is for b_management in haproxy;
+                  192.168.121.3 is for controller."
     
 resources:
 
