@@ -169,6 +169,7 @@ resources:
           security_group: { get_attr: [Lenovo-Networking, Security_Group] }
           
           ceph_fixed_ip: { get_param: ceph_fixed_ip }
+          cpu_count: { get_param: cpu_node_count }
 
   # Create ceph node.
   Lenovo-Ceph-Group:
@@ -217,6 +218,7 @@ resources:
           private_network: { get_attr: [Lenovo-Networking, Private_Network] }
           default_gw_br-mgmt: { get_param: [br_mgmt_subnet_cfg, gateway_ip] }
           security_group: { get_attr: [Lenovo-Networking, Security_Group] }
+          cpu_count: { get_attr: cpu_node_count }
           
           # If there are more than 8 controller nodes are defined, the following 
           # code should be updated, otherwise it will cause the ip confliction.          

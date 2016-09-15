@@ -103,6 +103,24 @@ function setup_nova_conf()
   sed -i "s/vms88/$1/g" /etc/nova/nova.conf
 }
 
+# add the compute nodes' ip and domain in /etc/hosts.
+function setup_hosts()
+{
+  sed -i "/node-372/d" /etc/hosts
+  sed -i "/node-373/d" /etc/hosts
+
+  let i=0 
+
+  while [ $i -lt $1 ]
+  do
+  cat >> /etc/hosts <<EOF
+192.168.121.$i    host-${i}.domain.tld     host-$i
+EOF
+  
+  let i=i+1
+  done
+}
+
 ################################################
 #		  MAIN			       #
 ################################################
@@ -114,6 +132,11 @@ sed -i "/flock/a\\route add default gw $DEFAULT_GW_BR_MGMT" \
 
 set_NIC
 set_hostname $NAME
+setup_hosts $CPU_COUNT
+
+# setup the /etc/hosts.
+sed -i "/node-372/d" /etc/hosts
+sed -i "/node-373/d" /etc/hosts
 
 # set the proper user for KVM to avoid the following ERROR:
 # "Could not access KVM kernel module: Permission denied\nfailed 

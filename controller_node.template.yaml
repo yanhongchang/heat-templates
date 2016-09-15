@@ -67,6 +67,8 @@ parameters:
     type: string        
   security_group:
     type: json
+  cpu_count:
+    type: number 
 
 resources:
 
@@ -213,6 +215,7 @@ resources:
             $DEFAULT_GATEWAY: { get_param: br-mgmt_default_gw }
             $NET_MASK: { get_param: br-mgmt_net_mask }
             $CEPH_FIXED_IP: { get_param: ceph_fixed_ip }
+            $CPU_COUNT: { get_param: cpu_count }
 
       networks:
         - port: { get_resource: ETH0-br-fw-admin }

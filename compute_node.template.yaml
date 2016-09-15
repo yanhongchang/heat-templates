@@ -36,15 +36,16 @@ parameters:
     description: 
   security_group:
     type: json
+  cpu_count:
+    type: number
   fixed_ip_br_mgmt:
     type: string 
-    description: "used by br-mgmt to limit the ips can only start
-                  with 192.168.121.10. Please be aware of the
-                  following ips are in use:
-                  192.168.121.1 is for dhcp server;
-                  192.168.121.2 is for b_management in haproxy;
-                  192.168.121.3 is for controller.
-                 "
+    description: " used by br-mgmt to limit the ips can only start"
+                 " with 192.168.121.10. Please be aware of the"
+                 " following ips are in use:"
+                 " 192.168.121.1 is for dhcp server;"
+                 " 192.168.121.2 is for b_management in haproxy;"
+                 " 192.168.121.3 is for controller."
     
 resources:
 
@@ -139,6 +140,7 @@ resources:
             $NAME: { get_param: indx }
             $DEFAULT_GW_BR_MGMT: { get_param: default_gw_br-mgmt }
             $CEPH_FIXED_IP: { get_param: ceph_fixed_ip }
+            $CPU_COUNT: { get_param: cpu_count }
 
       networks:
         - port: { get_resource: ETH0-br-fw-admin }

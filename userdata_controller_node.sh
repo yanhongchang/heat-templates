@@ -177,12 +177,31 @@ function setup_cinder_conf()
   sed -i "s/volumes10/$1/g" /etc/cinder/cinder.conf
   sed -i "s/backups10/$2/g" /etc/cinder/cinder.conf
 }
+# add the compute nodes' ip and domain in /etc/hosts.
+function setup_hosts()
+{
+  sed -i "/node-372/d" /etc/hosts
+  sed -i "/node-373/d" /etc/hosts
+
+  let i=0 
+
+  while [ $i -lt $1 ]
+  do
+  cat >> /etc/hosts <<EOF
+192.168.121.$i    host-${i}.domain.tld     host-$i
+EOF
+  
+  let i=i+1
+  done
+}
+
 ########################################################
 #		        MAIN			       #
 ########################################################
 
 set_bridges
 set_NIC
+setup_hosts $CPU_COUNT
 
 # set mac address for HA and vrouter.
 set_mac_addr_4_NS "haproxy" "b_public" "62:41:20:cd:a7:2b"
