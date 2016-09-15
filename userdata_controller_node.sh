@@ -188,7 +188,7 @@ function setup_hosts()
   while [ $i -lt $1 ]
   do
   cat >> /etc/hosts <<EOF
-192.168.121.$i    host-${i}.domain.tld     host-$i
+192.168.121.1$i    host-${i}.domain.tld     host-$i
 EOF
   
   let i=i+1
