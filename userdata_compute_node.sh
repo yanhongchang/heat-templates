@@ -132,11 +132,15 @@ sed -i "/flock/a\\route add default gw $DEFAULT_GW_BR_MGMT" \
 
 set_NIC
 set_hostname $NAME
-setup_hosts $CPU_COUNT
 
 # setup the /etc/hosts.
+setup_hosts $CPU_COUNT
 sed -i "/node-372/d" /etc/hosts
 sed -i "/node-373/d" /etc/hosts
+
+# setup this in /etc/nova/nova.conf to reach the vnc server.
+sed -i "/^vncserver_proxyclient_address/d" /etc/nova/nova.conf
+sed -i "/^\[DEFAULT/a\\vncserver_proxyclient_address=$FIXED_IP_BR_MGMT" /etc/nova/nova.conf
 
 # set the proper user for KVM to avoid the following ERROR:
 # "Could not access KVM kernel module: Permission denied\nfailed 
@@ -152,5 +156,3 @@ rebootVM
 
 # exit safely.
 exit 0
-
-

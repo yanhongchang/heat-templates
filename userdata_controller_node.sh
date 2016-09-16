@@ -225,5 +225,3 @@ rebootVM
 
 # exit safely.
 exit 0
-
-

@@ -17,3 +17,13 @@ Notes:
     192.168.121.3 is for b-mgmt on controller. ^M
     192.168.100.60 is b_public in haroxy. ^M
     192.168.100.61 is b_vrouter_pub in vrouter. ^M
+
+5. if we cannot reach the VNC server on web, please add or modify the following both on compute and controller node: 
+
+    "novncproxy_base_url=http://10.l00.219.73:6080/vnc_auto.html"
+
+   notes: 
+    i) 10.100.219.73 is the ip of controller front-end.
+    ii) if the "cannot connect the vnc server (10006)" hit, please check if "vncserver_proxyclient_address=192.168.121.10"
+        is added, where "192.168.121.10" is the compute node's ip. (this changes have alrady added by userdata script)
+

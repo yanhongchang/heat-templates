@@ -141,6 +141,7 @@ resources:
             $DEFAULT_GW_BR_MGMT: { get_param: default_gw_br-mgmt }
             $CEPH_FIXED_IP: { get_param: ceph_fixed_ip }
             $CPU_COUNT: { get_param: cpu_count }
+            $FIXED_IP_BR_MGMT: { get_param: fixed_ip_br_mgmt }
 
       networks:
         - port: { get_resource: ETH0-br-fw-admin }
