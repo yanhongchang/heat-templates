@@ -140,7 +140,7 @@ sed -i "/node-373/d" /etc/hosts
 
 # setup local_ip for ovs on compute node.
 sed -i "/^local_ip=/d" /etc/neutron/plugins/ml2/ml2_conf.ini
-sed -i "/^\[ovs/a\\local_ip=192.168.123.$FIXED_IP_BR_MESH" /etc/neutron/plugins/ml2/ml2_conf.ini
+sed -i "/^\[ovs/a\\local_ip=$FIXED_IP_BR_MESH" /etc/neutron/plugins/ml2/ml2_conf.ini
 
 # setup this in /etc/nova/nova.conf to reach the vnc server.
 sed -i "/^vncserver_proxyclient_address/d" /etc/nova/nova.conf
