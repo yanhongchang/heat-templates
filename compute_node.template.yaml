@@ -46,6 +46,12 @@ parameters:
                   192.168.121.1 is for dhcp server;
                   192.168.121.2 is for b_management in haproxy;
                   192.168.121.3 is for controller."
+  fixed_ip_br_mesh:
+    type: string 
+    description: "This is used to setup the local_ip for ovs on compute
+                  node. We can check if it is setup successfully with the 
+                  command 'ovs-vsctl show'. Or direct go to check the file
+                  /etc/neutron/plugins/ml2/ml2_conf.ini."
     
 resources:
 
@@ -142,6 +148,7 @@ resources:
             $CEPH_FIXED_IP: { get_param: ceph_fixed_ip }
             $CPU_COUNT: { get_param: cpu_count }
             $FIXED_IP_BR_MGMT: { get_param: fixed_ip_br_mgmt }
+            $FIXED_IP_BR_MESH: { get_param: fixed_ip_br_mesh }
 
       networks:
         - port: { get_resource: ETH0-br-fw-admin }

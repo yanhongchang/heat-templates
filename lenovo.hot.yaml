@@ -227,6 +227,12 @@ resources:
               template: 192.168.121.$INDEX
               params:
                 $INDEX: 1%index%
+          # Ditto.
+          fixed_ip_br_mesh: 
+            str_replace:
+              template: 192.168.123.$INDEX
+              params:
+                $INDEX: 1%index%
 
           ceph_fixed_ip: { get_param: ceph_fixed_ip }
 
