@@ -138,7 +138,8 @@ setup_hosts $CPU_COUNT
 sed -i "/node-372/d" /etc/hosts
 sed -i "/node-373/d" /etc/hosts
 
-# setup local_ip for ovs on compute node.
+# setup local_ip for ovs on compute node. If this is not setup
+# correctly, the neutron cannot assign the ips for vms by dhcp.
 sed -i "/^local_ip=/d" /etc/neutron/plugins/ml2/ml2_conf.ini
 sed -i "/^\[ovs/a\\local_ip=$FIXED_IP_BR_MESH" /etc/neutron/plugins/ml2/ml2_conf.ini
 
