@@ -1,1 +1,0 @@
-1. net04-ext only with one fixed IP and one floating IP
