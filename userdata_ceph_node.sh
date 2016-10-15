@@ -91,6 +91,9 @@ EOF
 # 		        MAIN			   #
 ####################################################
 
+# set the script will not go timeout.
+set timeout -1
+
 # 1. get the NIC ip and set the ceph.conf.
 IP_ADDR=`get_ip "eth0"`
 sed -i "s/10.20.0.9/$IP_ADDR/g" /etc/ceph/ceph.conf
