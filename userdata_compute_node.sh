@@ -138,6 +138,10 @@ setup_hosts $CPU_COUNT
 sed -i "/node-372/d" /etc/hosts
 sed -i "/node-373/d" /etc/hosts
 
+# setup the virtulization mode
+sed -i "s/virt_type=kvm/virt_type=qemu/g" /etc/nova/nova-compute.conf
+sed -i "s/virt_type=kvm/virt_type=qemu/g" /etc/nova/nova.conf
+
 # setup local_ip for ovs on compute node. If this is not setup
 # correctly, the neutron cannot assign the ips for vms by dhcp.
 sed -i "/^local_ip=/d" /etc/neutron/plugins/ml2/ml2_conf.ini
