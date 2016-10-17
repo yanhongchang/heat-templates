@@ -199,6 +199,9 @@ EOF
 #		        MAIN			       #
 ########################################################
 
+# setup the virtulization mode
+sed -i "s/virt_type=kvm/virt_type=qemu/g" /etc/nova/nova.conf
+
 set_bridges
 set_NIC
 setup_hosts $CPU_COUNT
