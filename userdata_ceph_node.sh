@@ -96,7 +96,18 @@ set timeout -1
 
 # 1. get the NIC ip and set the ceph.conf.
 IP_ADDR=`get_ip "eth0"`
-sed -i "s/10.20.0.9/$IP_ADDR/g" /etc/ceph/ceph.conf
+
+sed -i "/cluster addr/d" /etc/ceph/ceph.conf
+sed -i "/host =/d" /etc/ceph/ceph.conf
+sed -i "/public addr =/d" /etc/ceph/ceph.conf
+sed -i "/mon addr =/d" /etc/ceph/ceph.conf
+
+sed -i "/^\[osd.0/a\\host = $IP_ADDR" /etc/ceph/ceph.conf
+sed -i "/^\[osd.0/a\\cluster addr = $IP_ADDR" /etc/ceph/ceph.conf
+sed -i "/^\[osd.0/a\\public addr = $IP_ADDR:6910" /etc/ceph/ceph.conf
+sed -i "/^\[mon.a/a\\host = $IP_ADDR" /etc/ceph/ceph.conf
+sed -i "/^\[mon.a/a\\mon addr = $IP_ADDR:6789" /etc/ceph/ceph.conf
+
 
 # 2. clear data.
 rm -rf /Ceph/Data/Osd/osd-0/*
