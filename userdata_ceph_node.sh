@@ -112,6 +112,17 @@ fi
 # 5. start ceph.
 mount_disk && create_cephfs && start_ceph
 
+# 6. set the ceph node use static IP address
+sed -i "/dhcp/static/" /etc/sysconfig/network/ifcfg-eth0
+
+sed -i "/^IPADDR/d" /etc/sysconfig/network/ifcfg-eth0
+sed -i "/^BOOTPROTO/a\\IPADDR='$IP_ADDR'" /etc/sysconfig/network/ifcfg-eth0
+
+sed -i "/^STARTMODE/d" /etc/sysconfig/network/ifcfg-eth0
+sed -i "/^BOOTPROTO/a\\STARTMODE='onboot'" /etc/sysconfig/network/ifcfg-eth0
+
+service network restart
+
 # just check if the cloud-init is workable.
 touch /home/lock.file
 
