@@ -47,6 +47,9 @@ function create_cephfs()
   cat > /home/create_cephfs.sh <<EOF
 #!/usr/bin/expect
 
+# set the script will not go timeout.
+set timeout -1
+
 # create the ceph fs.
 spawn /sbin/mkcephfs -a -c /etc/ceph/ceph.conf
 expect {
@@ -75,6 +78,9 @@ function start_ceph()
   cat > /home/start_ceph.sh <<EOF
 #!/usr/bin/expect
 
+# set the script will not go timeout.
+set timeout -1
+
 # start ceph
 spawn /etc/init.d/ceph -a -c /etc/ceph/ceph.conf start
 expect {
@@ -90,9 +96,6 @@ EOF
 ####################################################
 # 		        MAIN			   #
 ####################################################
-
-# set the script will not go timeout.
-set timeout -1
 
 # 1. get the NIC ip and set the ceph.conf.
 IP_ADDR=`get_ip "eth0"`
