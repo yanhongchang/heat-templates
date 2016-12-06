@@ -27,3 +27,4 @@ Notes:
     ii) if the "cannot connect the vnc server (10006)" hit, please check if "vncserver_proxyclient_address=192.168.121.10"
         is added, where "192.168.121.10" is the compute node's ip. (this changes have alrady added by userdata script)
 
+6. The images used is created from the environment setup by fuel. And the code is kilo.
