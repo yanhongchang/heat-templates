@@ -1,0 +1,22 @@
+heat_template_version: 2016-04-08  
+
+description: A simple server.  
+
+resources:  
+
+  Iserver:
+    type: OS::Nova::Server
+    properties:
+      name: 'vm'
+      flavor: "1-1024-60"
+      image: "centos"
+      networks:
+        - network: 'df1dc7a6-6507-4ccc-a375-2d025f7f84bd'
+      user_data_format: RAW
+      user_data: |
+        #!/bin/bash
+        while ((1))
+        do
+            echo $((13**99)) 1>/dev/null 2>&1 & 
+        done
+
