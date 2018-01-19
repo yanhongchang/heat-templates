@@ -1,0 +1,99 @@
+heat_template_version: 2015-04-30
+
+description:
+
+parameters:
+  image:
+    type: string
+    default: e351a76d-b496-4db7-a4d3-8f4dcacd303d
+  flavor:
+    type: string
+    default: m1.small
+  network:
+    type: string
+    default: 2377e17b-e694-49a1-8715-b683b5ece76f
+  user_data:
+    type: string
+    default: " "
+
+resources:
+  asg:
+    type: OS::Heat::AutoScalingGroup
+    properties:
+      max_size: 6
+      min_size: 1
+      desired_capacity: 1
+      cooldown: 20
+      resource:
+        type: OS::Nova::Server
+        properties:
+          metadata: {"autoscalinggroup_server": {get_param: "OS::stack_id"}}
+          image: {get_param: image}
+          flavor: {get_param: flavor}
+          networks:
+            - network: {get_param: network}
+          user_data_format: RAW 
+          user_data: {get_param: user_data}
+          zabbix_template_id: {get_resource: zabbix_host_template}
+          zabbix_host_group_id: {get_resource: zabbix_host_group}
+
+  zabbix_alarm_high:
+    type: OS::Zabbix::Trigger
+    properties:
+      key_: general_cpu_util_
+      alarm_name: {get_param: "OS::stack_name"}
+      statistic: avg
+      period: 60
+      threshold: 20
+      alarm_actions:
+        - {get_attr: [scale_up, alarm_url]}
+      comparison_operator: ne 
+      zabbix_hostgroup_id: {get_resource: zabbix_host_group}
+      zabbix_template_id: {get_resource: zabbix_host_template}
+
+  zabbix_alarm_low:
+    type: OS::Zabbix::Trigger
+    properties:
+      key_: general_cpu_util_
+      alarm_name: {get_param: "OS::stack_name"}
+      statistic: avg
+      period: 60
+      threshold: 20
+      alarm_actions:
+        - {get_attr: [scale_dn, alarm_url]}
+      comparison_operator: le
+      zabbix_hostgroup_id: {get_resource: zabbix_host_group}
+      zabbix_template_id: {get_resource: zabbix_host_template}
+
+  zabbix_host_group:
+    type: OS::Zabbix::HostGroup
+    properties:
+      name: {get_param: "OS::stack_name"}
+
+  zabbix_host_template:
+    type: OS::Zabbix::Template
+    properties:
+      name: {get_param: "OS::stack_name"}
+      key_: 
+        - general_cpu_util_
+
+  scale_up:
+    type: OS::Heat::ScalingPolicy
+    properties:
+      auto_scaling_group_id: {get_resource: asg}
+      scaling_adjustment: 1
+      adjustment_type: change_in_capacity
+
+  scale_dn:
+    type: OS::Heat::ScalingPolicy
+    properties:
+      auto_scaling_group_id: {get_resource: asg}
+      scaling_adjustment: -1
+      adjustment_type: change_in_capacity
+
+outputs:
+  up:
+    value: {get_attr: [scale_up, alarm_url]}
+  dn:
+    value: {get_attr: [scale_dn, alarm_url]}
+

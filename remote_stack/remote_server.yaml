@@ -1,0 +1,29 @@
+heat_template_version: 2015-04-30
+
+parameters:
+  image: 
+    type: string
+    default: e351a76d-b496-4db7-a4d3-8f4dcacd303d
+  flavor:
+    type: string
+    default: m1.small
+  network:
+    type: string
+    default: a0f7bfae-5681-4cfe-880c-c0dc37fca1b7
+  user_data:
+    type: string
+    default: |
+      #!/bin/bash
+      touch /home/jeguan.log
+      echo "test"> /home/jeguan.log
+
+resources:
+  my_vm:
+    type: OS::Nova::Server
+    properties:
+      image: {get_param: image}
+      flavor: {get_param: flavor}
+      networks:
+        - network: {get_param: network}
+      user_data_format: RAW
+      user_data: {get_param: user_data}
